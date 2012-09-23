@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
                 ((0, 1), 1),
                 ((1, 0), 1),
                 ((1, 1), 0)]
-        nn.train_network(data, data)
+        nn.train_network(data)
         
     def testOverflow(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)

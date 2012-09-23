@@ -65,42 +65,21 @@ class NeuralNetwork(object):
                 val += self.weights_out[j][k] * self.activation_hid[k]
             self.activation_out[j] = self._tanh(val)
             
-        return self.activation_out
+        ret = self.activation_out
+        return ret
         
-    def train_network(self, data_train, data_validation, change_mult=0.2, 
-                      momentum_mult=0.0, success_goal=0.95, max_iter=100000):
+    def train_network(self, data_train, change_rate=0.2, momentum=0.0, 
+                      iters=1000):
         '''Train the network with repeated evaluations and back propagations.
-        Training will continue until either the goal success rate is hit or the
-        max iterations.
-        
         Data is passed as a list of input, target pairs.'''
-        import math
-        epoch_size = max(math.ceil(max_iter / 1000), 10)
-        current_rate = 0.0  # Running success rate
-        iterations = 0  # Number of trainings done
-        while current_rate < success_goal and iterations < max_iter:
-            
-            # First train the network.
-            for i in range(epoch_size):
-                selection = math.floor(random() * len(data_train))
-                data = data_train[selection]
-                self.evaluate(data[0])
-                self._back_propagate(data[1], change_mult, momentum_mult)
-                iterations += 1
-            
-            # And after training, see if it's good enough to stop.
-            error_count = 0
-            for values, targets in data_validation:
-                output = self.evaluate(values)
-                if type(targets) is int:
-                    targets = [targets]
-                if output != targets:
-                    error_count += 1
-            
-            current_rate = error_count / len(data_validation)
-            print('Iterations: {} Success rate: {}'.format(iterations, 
-                                                           current_rate))
-                
+        # First train the network.
+        for i in range(iters):
+            # Choose a random element from the training set
+            selection = math.floor(random() * len(data_train))
+            data = data_train[selection]
+            self.evaluate(data[0])
+            self._back_propagate(data[1], change_rate, momentum)
+                     
     def _back_propagate(self, target, change_mult, momentum_mult):
         '''Work from the output of the network back up adjusting outputs and
         weights to inch nearer the connections (and therefore the answers) we
