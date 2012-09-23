@@ -7,6 +7,7 @@ A flexible, neat neural network.
 '''
 
 from random import random
+import math
 
 class NeuralNetwork(object):
     '''
@@ -66,7 +67,7 @@ class NeuralNetwork(object):
             
         return self.activation_out
         
-    def train_network(self, data_train, data_validation, change_mult=0.7, 
+    def train_network(self, data_train, data_validation, change_mult=0.2, 
                       momentum_mult=0.0, success_goal=0.95, max_iter=100000):
         '''Train the network with repeated evaluations and back propagations.
         Training will continue until either the goal success rate is hit or the
@@ -160,9 +161,12 @@ class NeuralNetwork(object):
     def _tanh(self, x):
         '''Return the hyberbolic tangent of x. Tanh produces a nice sigmoidal
         function to use for the evaluations.'''
-        import math
-        tan = (math.e ** (2 * x) - 1) / (math.e ** (2 * x) + 1)
-        return tan
+        # x tends to get big after lots of iterations and cause overflow.
+        # Not sure limiting it here is the best fix. As far as tangent is
+        # concerned though, x values > 5 don't help (overflow happens > 350)
+        if x > 5: x = 5
+        elif x < -5: x = -5
+        return ((math.e ** (2 * x)) - 1) / ((math.e ** (2 * x)) + 1)
     
     def _derivative_tanh(self, y):
         '''Given the activation value of a neuron (the output of tanh(x))

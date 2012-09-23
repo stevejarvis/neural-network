@@ -12,6 +12,8 @@ import unittest
 import neuralnet
 import os
 import glob
+import random
+import decimal
 
 class Test(unittest.TestCase):
 
@@ -102,6 +104,13 @@ class Test(unittest.TestCase):
                 ((1, 0), 1),
                 ((1, 1), 0)]
         nn.train_network(data, data)
+        
+    def testOverflow(self):
+        nn = neuralnet.NeuralNetwork(2, 2, 1)
+        for i in range(10):
+            val = decimal.Decimal(random.random())
+            tan = nn._tanh(float(val))
+            assert -1 < tan < 1
                 
 
 if __name__ == "__main__":
