@@ -111,6 +111,18 @@ class Test(unittest.TestCase):
             val = decimal.Decimal(random.random())
             tan = nn._tanh(float(val))
             assert -1 < tan < 1
+            
+    def testDot(self):
+        nn = neuralnet.NeuralNetwork(2, 2, 1)
+        m1 = [1, 2, 3]
+        m2 = [(1,2),
+              (3,4),
+              (4,3)]
+        assert nn._dot(m1, m2) == [19, 19]
+        m1 = [1,2,3,4]
+        self.assertRaises(ValueError,
+                          nn._dot,
+                          m1, m2)
                 
 
 if __name__ == "__main__":

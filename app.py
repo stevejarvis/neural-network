@@ -17,9 +17,12 @@ data_train = [((0, 0), 0),
               ((1, 0), 1),
               ((1, 1), 0)]
 
-# There are a handful of optional kw args, but defaults are OK.
-nn.train_network(data_train, iters=1000)
-
-for i in range(4):
-    out = nn.evaluate(data_train[i][0])
-    print('data[{}] -> {}'.format(data_train[i][0], out))
+for n in range(100):
+    # There are a handful of optional kw args, but defaults are OK.
+    nn.train_network(data_train, iters=5, momentum=0.1, change_rate=0.5)
+    
+    for i in range(4):
+        out = nn.evaluate(data_train[i][0])
+        print('data[{}] -> {}'.format(data_train[i][0], out[0]))
+        
+    print('\n******************************\n')
