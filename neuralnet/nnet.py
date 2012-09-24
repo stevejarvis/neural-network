@@ -138,11 +138,6 @@ class NeuralNetwork(object):
     def _tanh(self, x):
         '''Return the hyberbolic tangent of x. Tanh produces a nice sigmoidal
         function to use for the evaluations.'''
-        # x tends to get big after lots of iterations and cause overflow.
-        # Not sure limiting it here is the best fix. As far as tangent is
-        # concerned though, x values > 5 don't help (overflow happens > 350)
-        if x > 5: x = 5
-        elif x < -5: x = -5
         return ((math.e ** (2 * x)) - 1) / ((math.e ** (2 * x)) + 1)
     
     def _derivative_tanh(self, y):
