@@ -77,30 +77,30 @@ class NeuralNetwork(object):
             target = [target]
         
         # First calculate deltas of the output weights. 
-		# delta = (expected - actual) * d(tanh(a))/da
+        # delta = (expected - actual) * d(tanh(a))/da
         delta_out = [0.0] * self.num_output
         for j in range(self.num_output):
             error = target[j] - self.activation_out[j]
             delta_out[j] = error * self._derivative_tanh(self.activation_out[j])
         
         # Calculate the deltas of the hidden layer.
-		# delta = sum(downstream weights * deltas) * d(tanh(a))/da
-		#
-		# Slightly more complicated than output because of the need to consider
-		# all connected neurons further down the chain. Each neurons expected
-		# output is a minimization of the collective downstream errors.
+        # delta = sum(downstream weights * deltas) * d(tanh(a))/da
+        #
+        # Slightly more complicated than output because of the need to consider
+        # all connected neurons further down the chain. Each neurons expected
+        # output is a minimization of the collective downstream errors.
         delta_hid = [0.0] * self.num_hidden
         for j in range(self.num_hidden):
             error = 0.0
-			# This inner loop sums all errors downstream of the current neuron
+            # This inner loop sums all errors downstream of the current neuron
             for k in range(self.num_output):
                 error += delta_out[k] * self.weights_out[j][k]
             delta_hid[j] = error * self._derivative_tanh(self.activation_hid[j])
                 
         # Then adjust the weights of the output.
-		#
-		# change = cofactor * delta * current_value + momentum
-		# weights += changes
+        #
+        # change = cofactor * delta * current_value + momentum
+        # weights += changes
         for j in range(self.num_hidden):
             for k in range(self.num_output):
                 change = change_mult * delta_out[k] * self.activation_hid[j]
