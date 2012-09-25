@@ -60,7 +60,7 @@ class NeuralNetwork(object):
         return self.activation_out
                      
     def _back_propagate(self, target, change_mult, momentum_mult):
-        '''Work from the output of the network back up adjusting outputs and
+        '''Work from the output of the network back up adjusting
         weights to inch nearer the connections (and therefore the answers) we
         want.'''
         # Target could have been passed as an int, but needs to be expandable
@@ -100,7 +100,7 @@ class NeuralNetwork(object):
                                                     self.momentum_hid[j][k])
                 self.momentum_hid[j][k] = change
                 
-    def train_network(self, data_train, change_rate=0.2, momentum=0.0, 
+    def train_network(self, data_train, change_rate=0.4, momentum=0.1, 
                       iters=1000):
         '''Train the network with repeated evaluations and back propagations.
         Data is passed as a list of input, target pairs.'''

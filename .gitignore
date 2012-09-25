@@ -1,0 +1,9 @@
+# Certain files we don't want included
+
+# Python compiled stuff
+*.pyc
+*/__pycache__/
+
+# Eclipse config files
+.project
+.pydevproject
