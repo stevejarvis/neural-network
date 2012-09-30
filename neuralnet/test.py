@@ -123,6 +123,23 @@ class Test(unittest.TestCase):
         self.assertRaises(ValueError,
                           nn._dot,
                           m1, m2)
+        
+    def testOverall(self):
+        nn = neuralnet.NeuralNetwork(2, 3, 2)
+        data = [((0, 0), (0, 1)), 
+              ((0, 1), (1, 0)),
+              ((1, 0), (1, 0)),
+              ((1, 1), (0, 1))]
+        for n in range(10):
+            nn.train_network(data, iters=1000, change_rate=0.5, momentum=0.2)
+        out = nn.evaluate(data[0][0])
+        assert out[0] < 0.2 and out[1] > 0.8
+        out = nn.evaluate(data[1][0])
+        assert out[0] > 0.8 and out[1] < 0.2
+        out = nn.evaluate(data[2][0])
+        assert out[0] > 0.8 and out[1] < 0.2
+        out = nn.evaluate(data[3][0])
+        assert out[0] < 0.2 and out[1] > 0.8
                 
 
 if __name__ == "__main__":
