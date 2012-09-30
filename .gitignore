@@ -7,3 +7,5 @@
 # Eclipse config files
 .project
 .pydevproject
+
+.metadata/
