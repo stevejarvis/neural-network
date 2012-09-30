@@ -8,14 +8,17 @@ Example app using the neuralnet package. It will learn the XOR gate.
 
 import neuralnet
 
-nn = neuralnet.NeuralNetwork(2, 2, 1)
+''' Define the neural net slightly differently. Instead of interpreting a
+single output as a 1 or 0, have two outputs, one representing 1, the 
+second 0.'''
+nn = neuralnet.NeuralNetwork(2, 3, 2)
 
 # Generally you want different data sets for training and testing, but
 # we're very limited with XOR.
-data_train = [((0, 0), 0), 
-              ((0, 1), 1),
-              ((1, 0), 1),
-              ((1, 1), 0)]
+data_train = [((0, 0), (0, 1)), 
+              ((0, 1), (1, 0)),
+              ((1, 0), (1, 0)),
+              ((1, 1), (0, 1))]
 
 for n in range(1000):
     # There are a handful of optional kw args, but defaults are OK.
