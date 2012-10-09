@@ -4,15 +4,6 @@ Created on Sep 19, 2012
 @author: steve
 
 A flexible, neat neural network.
-
-The public interface is meant to be used like this:
-
-nn = NeuralNet(number_in, number_hid, number_out)
-while not_satisfied:
-    nn.train(data, change_rate, momentum_rate, iterations)
-answer = nn.evaluate(inputs)   
-nn.save_weights('/some/path')
-nn.load_weights('/some/path')
 '''
 
 from random import random
@@ -20,7 +11,14 @@ import math
 
 class NeuralNetwork(object):
     '''
-    This is, uh, the important part.
+    The public interface is meant to be used like this:
+
+    nn = NeuralNet(number_in, number_hid, number_out)
+    while not_satisfied:
+        nn.train(data, change_rate, momentum_rate, iterations)
+    answer = nn.evaluate(inputs)   
+    nn.save_weights('/some/path')
+    nn.load_weights('/some/path')
     '''
     
     def __init__(self, nin, nhid, nout):
@@ -71,7 +69,14 @@ class NeuralNetwork(object):
     def _back_propagate(self, target, change_mult, momentum_mult):
         '''Work from the output of the network back up adjusting
         weights to inch nearer the connections (and therefore the answers) we
-        want.'''
+        want.
+        
+        ...I struggled with back propagation for a while. I reveal my best
+        understanding in the comments but I referenced many tutorials and
+        examples before I got a grasp of it. Point is, through the struggle, 
+        this method became more the collective work of other open source 
+        projects than from my own mind.
+        '''
         # Target could have been passed as an int, but needs to be expandable
         if type(target) is int:
             target = [target]
