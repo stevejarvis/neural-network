@@ -75,8 +75,7 @@ class NeuralNetwork(object):
         understanding in the comments but I referenced many tutorials and
         examples before I got a grasp of it. Point is, through the struggle, 
         this method became more the collective work of other open source 
-        projects than from my own mind.
-        '''
+        projects than from my own mind.'''
         # Target could have been passed as an int, but needs to be expandable
         if type(target) is int:
             target = [target]
@@ -136,12 +135,32 @@ class NeuralNetwork(object):
             self._back_propagate(data[1], change_rate, momentum)
     
     def load_weights(self, source):
-        # TODO
-        pass
+        '''In actual implementation it would be inefficient to train the 
+        network each time. Instead, save and load weights.'''
+        with open(source, 'r') as f:
+            lines = [line.strip('\n') for line in f.readlines()]
+        if len(lines) != self.num_input + self.num_hidden:
+            raise ValueError('Invalid file format for weights.')
+        for j in range(self.num_input):
+            # Splice to remove empty last item (due to ending line in comma).
+            weights = lines[j].split(',')[:-1]
+            self.weights_hid[j] = [float(x) for x in weights]
+        for j in range(self.num_hidden):
+            weights = lines[j + self.num_input].split(',')[:-1]
+            self.weights_out[j] = [float(x) for x in weights]
     
     def save_weights(self, dest):
-        # TODO
-        pass
+        '''Save the current weights to dest in a comma-separated format.
+        Will overwrite if file exists.'''
+        with open(dest, 'w') as f:
+            for row in self.weights_hid:
+                for col in row:
+                    print(col, file=f, end=',')
+                print('', file=f)
+            for row in self.weights_out:
+                for col in row:
+                    print(col, file=f, end=',')
+                print('', file=f)
     
     def _make_matrix(self, depth, breadth, fill=None):
         matrix = []

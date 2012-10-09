@@ -42,23 +42,14 @@ class Test(unittest.TestCase):
 
     def testBadInputLoadWeights(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)
-        goodpath = './weights_good.test'
         badpath = './weights_bad.test'
-        # File should be accepted
-        with open(goodpath, 'w') as f:
-            print('0.32 .7', file=f)
-            print('0.56 .49', file=f)
-            print('0.32', file=f)
-        # File should be rejected
         with open(badpath, 'w') as f:
             print('0.32 .7', file=f)
             print('0.56', file=f)
             print('0.32 .4', file=f)
-        nn.load_weights(goodpath)
-        #TODO implement this
-        '''self.assertRaises(ValueError, 
+        self.assertRaises(ValueError, 
                           nn.load_weights,
-                          badpath)'''
+                          badpath)
         
     def testMatrixMaker(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)
@@ -140,7 +131,51 @@ class Test(unittest.TestCase):
         assert out[0] > 0.8 and out[1] < 0.2
         out = nn.evaluate(data[3][0])
         assert out[0] < 0.2 and out[1] > 0.8
-                
+        
+    def testSaveLoadWeightsFunctionality(self):
+        nn = neuralnet.NeuralNetwork(2, 3, 2)
+        data = [((0, 0), (0, 1)), 
+              ((0, 1), (1, 0)),
+              ((1, 0), (1, 0)),
+              ((1, 1), (0, 1))]
+        for n in range(10):
+            nn.train_network(data, iters=1000, change_rate=0.5, momentum=0.2)
+        out = nn.evaluate(data[0][0])
+        assert out[0] < 0.2 and out[1] > 0.8
+        out = nn.evaluate(data[1][0])
+        assert out[0] > 0.8 and out[1] < 0.2
+        out = nn.evaluate(data[2][0])
+        assert out[0] > 0.8 and out[1] < 0.2
+        out = nn.evaluate(data[3][0])
+        assert out[0] < 0.2 and out[1] > 0.8
+        nn.save_weights('./weights.test')
+        nn2 = neuralnet.NeuralNetwork(2, 3, 2)
+        nn2.load_weights('./weights.test')
+        out = nn2.evaluate(data[0][0])
+        assert out[0] < 0.2 and out[1] > 0.8
+        out = nn2.evaluate(data[1][0])
+        assert out[0] > 0.8 and out[1] < 0.2
+        out = nn2.evaluate(data[2][0])
+        assert out[0] > 0.8 and out[1] < 0.2
+        out = nn2.evaluate(data[3][0])
+        assert out[0] < 0.2 and out[1] > 0.8
+       
+    def testSaveLoad(self):
+        nn = neuralnet.NeuralNetwork(2, 3, 2)
+        nn.save_weights('./save.test')
+        nn2 = neuralnet.NeuralNetwork(2, 3, 2)
+        nn2.load_weights('./save.test')
+        assert nn.weights_hid == nn2.weights_hid
+        assert nn.weights_out == nn2.weights_out
+        
+    def testBadWeights(self):
+        nn = neuralnet.NeuralNetwork(2, 4, 2)
+        nn.save_weights('./save.test')
+        nn2 = neuralnet.NeuralNetwork(2, 3, 2)
+        self.assertRaises(ValueError, 
+                          nn2.load_weights,
+                          './save.test')
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
