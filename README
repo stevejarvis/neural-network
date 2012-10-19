@@ -6,3 +6,6 @@ is made flexible with variable numbers of neurons and coefficients affecting
 momentum and learning rate. They simple flexibility makes it easy to see how 
 changes affect behavoir (i.e. epochs until a set is learned, or whether a set 
 can be learned at all.)
+
+I'd like this code to be used freely, it's licensed with the MIT license.
+See LICENSE for more details.
