@@ -6,6 +6,7 @@ Created on Sep 19, 2012
 A flexible, neat neural network.
 '''
 
+from __future__ import print_function
 from random import random
 import math
 
@@ -130,7 +131,7 @@ class NeuralNetwork(object):
         for i in range(iters):
             # Choose a random element from the training set
             selection = math.floor(random() * len(data_train))
-            data = data_train[selection]
+            data = data_train[int(selection)]
             self.evaluate(data[0])
             self._back_propagate(data[1], change_rate, momentum)
     
