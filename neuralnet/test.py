@@ -8,12 +8,14 @@ Now do your tests first, honey.
 Write temp files to end in '.test' and they'll be 
 cleaned up.
 '''
+import sys
 import unittest
-import neuralnet
 import os
 import glob
 import random
 import decimal
+sys.path.append('..')
+import neuralnet
 
 class Test(unittest.TestCase):
 
