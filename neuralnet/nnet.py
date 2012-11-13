@@ -24,8 +24,11 @@ class NeuralNetwork(object):
     
     def __init__(self, nin, nhid, nout):
         # Check for valid input
-        if 0 in [nin, nhid, nout]:
-            raise ValueError('Must have more than one node for each layer')
+        for param in [nin, nhid, nout]:
+            if param == 0:
+                raise ValueError('Must have more than one node for each layer')
+            elif not isinstance(param, int):
+                raise ValueError('Dimensions of network must be ints.')
         
         # Add one to the input layer to act as a bias. The bias helps ensure
         # that the network is able to learn the related function by shifting
