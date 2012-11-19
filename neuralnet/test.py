@@ -8,6 +8,8 @@ Now do your tests first, honey.
 Write temp files to end in '.test' and they'll be 
 cleaned up.
 '''
+
+from __future__ import print_function
 import sys
 import unittest
 import os
@@ -178,6 +180,62 @@ class Test(unittest.TestCase):
                           nn2.load_weights,
                           './save.test')
         
+    def testHugeNetwork(self):
+        ''' Make a list of relatively simple but big data, make sure the
+        nnet can learn it. '''
+        import math
+        import datetime
+        min_size = 10
+        max_size = 100
+        failures = []
+        times = []
+        
+        for size in range(min_size, max_size):
+            print('On %d...' %size)
+            num_out = int(math.sqrt(size))
+            nn = neuralnet.NeuralNetwork(size, size, num_out)
+            data = []
+            for i in range(max_size):
+                input = [1  if j == i else 0 for j in range(size)]
+                answer = [1 if j == int(i/2) else -1 for j in range(num_out)]
+                data.append((input, answer))
+                
+            start_time = datetime.datetime.now()
+            for n in range(5):
+                nn.train_network(data, 
+                                 iters=1000, 
+                                 change_rate=0.5, 
+                                 momentum=0.2) 
+            t = (datetime.datetime.now() - start_time).total_seconds() 
+            times.append(t)      
+            
+            # Var to count number of failures for each size
+            num_failures = 0
+            for set in data:
+                res = nn.evaluate(set[0])
+                res = [round(x) for x in res]
+                #self.assertEqual(res, set[1], 'Fail with size %d' %size)
+                if res != set[1]:
+                    # The network got it wrong
+                    num_failures += 1
+            failures.append(num_failures)
+            
+        # Plot it so I can look at something nice in a couple hours.
+        try:
+            import matplotlib.pyplot as lab
+        except:
+            ''' Install matplotlib. '''
+            pass
+        else:
+            x_data = range(min_size, max_size)
+            lab.title('Errors & Time vs Network Size -- Constant Iterations')
+            lab.xlabel('Network Size (# of input and hidden neurons)')
+            lab.ylabel('Errors (on data of size %d) and Time (seconds)' %max_size)
+            lab.plot(x_data, failures, color='r', label='Failures')
+            lab.plot(x_data, times, color='b', label='Time (seconds)')
+            lab.legend()
+            lab.show()
+                
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
