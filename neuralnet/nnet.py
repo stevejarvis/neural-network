@@ -141,30 +141,19 @@ class NeuralNetwork(object):
     def load_weights(self, source):
         '''In actual implementation it would be inefficient to train the 
         network each time. Instead, save and load weights.'''
-        with open(source, 'r') as f:
-            lines = [line.strip('\n') for line in f.readlines()]
-        if len(lines) != self.num_input + self.num_hidden:
-            raise ValueError('Invalid file format for weights.')
-        for j in range(self.num_input):
-            # Splice to remove empty last item (due to ending line in comma).
-            weights = lines[j].split(',')[:-1]
-            self.weights_hid[j] = [float(x) for x in weights]
-        for j in range(self.num_hidden):
-            weights = lines[j + self.num_input].split(',')[:-1]
-            self.weights_out[j] = [float(x) for x in weights]
+        import shelve
+        d = shelve.open(source)
+        self.weights_hid = d['weights_hid']
+        self.weights_out = d['weights_out']
+        d.close()
     
     def save_weights(self, dest):
-        '''Save the current weights to dest in a comma-separated format.
-        Will overwrite if file exists.'''
-        with open(dest, 'w') as f:
-            for row in self.weights_hid:
-                for col in row:
-                    print(col, file=f, end=',')
-                print('', file=f)
-            for row in self.weights_out:
-                for col in row:
-                    print(col, file=f, end=',')
-                print('', file=f)
+        '''Save the current weights with shelve. '''
+        import shelve
+        d = shelve.open(dest)
+        d['weights_hid'] = self.weights_hid
+        d['weights_out'] = self.weights_out
+        d.close()
     
     def _make_matrix(self, depth, breadth, fill=None):
         matrix = []
