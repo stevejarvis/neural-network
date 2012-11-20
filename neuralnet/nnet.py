@@ -143,12 +143,17 @@ class NeuralNetwork(object):
         network each time. Instead, save and load weights.'''
         import shelve
         d = shelve.open(source)
-        self.weights_hid = d['weights_hid']
-        self.weights_out = d['weights_out']
+        hid_temp = d['weights_hid']
+        out_temp = d['weights_out']
+        if (len(self.weights_hid) != len(hid_temp) 
+                or len(self.weights_out) != len(out_temp)):
+            raise ValueError('Wrong dimensions  on set of weights.')
+        self.weights_hid = hid_temp
+        self.weights_out = out_temp
         d.close()
     
     def save_weights(self, dest):
-        '''Save the current weights with shelve. '''
+        '''Save the current weights with shelve.'''
         import shelve
         d = shelve.open(dest)
         d['weights_hid'] = self.weights_hid

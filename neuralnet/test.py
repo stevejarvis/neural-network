@@ -43,17 +43,6 @@ class Test(unittest.TestCase):
         self.assertRaises(ValueError, 
                           neuralnet.NeuralNetwork,
                           1, 0, 1)
-
-    def testBadInputLoadWeights(self):
-        nn = neuralnet.NeuralNetwork(2, 2, 1)
-        badpath = './weights_bad.test'
-        with open(badpath, 'w') as f:
-            print('0.32 .7', file=f)
-            print('0.56', file=f)
-            print('0.32 .4', file=f)
-        self.assertRaises(ValueError, 
-                          nn.load_weights,
-                          badpath)
         
     def testMatrixMaker(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)
@@ -175,7 +164,7 @@ class Test(unittest.TestCase):
     def testBadWeights(self):
         nn = neuralnet.NeuralNetwork(2, 4, 2)
         nn.save_weights('./save.test')
-        nn2 = neuralnet.NeuralNetwork(2, 3, 2)
+        nn2 = neuralnet.NeuralNetwork(1, 7, 1)
         self.assertRaises(ValueError, 
                           nn2.load_weights,
                           './save.test')
@@ -186,7 +175,7 @@ class Test(unittest.TestCase):
         import math
         import datetime
         min_size = 10
-        max_size = 12
+        max_size = 70
         failures = []
         times = []
         
@@ -196,7 +185,8 @@ class Test(unittest.TestCase):
             nn = neuralnet.NeuralNetwork(size, size, num_out)
             data = []
             for i in range(max_size):
-                # Consider the input the index of number 1. i.e. [0,0,0,1] is thought of as 3.
+                # Consider the input the index of number 1. i.e. [0,0,0,1] is 
+                # thought of as 3.
                 input_bits = [1  if j == i else 0 for j in range(size)]
                 # Learn math: answer = root(input_index) - input_index
                 # In other words: answer[input_index^2 + input_index] = 1
