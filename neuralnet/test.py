@@ -186,7 +186,7 @@ class Test(unittest.TestCase):
         import math
         import datetime
         min_size = 10
-        max_size = 100
+        max_size = 12
         failures = []
         times = []
         
@@ -196,9 +196,12 @@ class Test(unittest.TestCase):
             nn = neuralnet.NeuralNetwork(size, size, num_out)
             data = []
             for i in range(max_size):
-                input = [1  if j == i else 0 for j in range(size)]
-                answer = [1 if j == int(i/2) else -1 for j in range(num_out)]
-                data.append((input, answer))
+                # Consider the input the index of number 1. i.e. [0,0,0,1] is thought of as 3.
+                input_bits = [1  if j == i else 0 for j in range(size)]
+                # Learn math: answer = root(input_index) - input_index
+                # In other words: answer[input_index^2 + input_index] = 1
+                answer = [1 if input_bits[j*j+j] == 1 else -1 for j in range(num_out)]
+                data.append((input_bits, answer))
                 
             start_time = datetime.datetime.now()
             for n in range(5):
