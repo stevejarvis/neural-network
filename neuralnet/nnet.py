@@ -78,8 +78,8 @@ class NeuralNetwork(object):
         ...I struggled with back propagation for a while. I reveal my best
         understanding in the comments but I referenced many tutorials and
         examples before I got a grasp of it. Point is, through the struggle, 
-        this method became more the collective work of other open source 
-        projects than from my own mind.'''
+        this method became as much collective work of other open source 
+        projects as from my own mind.'''
         # Target could have been passed as an int, but needs to be expandable
         if type(target) is int:
             target = [target]
@@ -166,7 +166,7 @@ class NeuralNetwork(object):
             for row in range(depth):
                 matrix.append([])
                 for col in range(breadth):
-                    matrix[len(matrix) - 1].append(random() - 0.5)
+                    matrix[len(matrix) - 1].append(0.5 * (random() - 0.5))
         else:
             for row in range(depth):
                 matrix.append([])
