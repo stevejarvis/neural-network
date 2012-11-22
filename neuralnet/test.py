@@ -25,6 +25,8 @@ class Test(unittest.TestCase):
         pass
 
     def tearDown(self):
+        # Tests that write to files should write to .test files, they'll be
+        # cleaned up.
         for f in glob.glob('*.test'):
             os.remove(f)
 
@@ -169,18 +171,22 @@ class Test(unittest.TestCase):
                           nn2.load_weights,
                           './save.test')
         
-    def testHugeNetwork(self):
-        ''' Make a list of relatively simple but big data, make sure the
-        nnet can learn it. '''
+    def testLargerNetworks(self):
+        ''' LONG RUNNING TEST. Make a list of relatively simple but big data, 
+        make sure the nnet can learn it. '''
         import math
         import datetime
-        min_size = 10
-        max_size = 70
+        # Just change these sizes to change the network sizes tested.
+        min_size = 50
+        max_size = 200
+        skip = 3
+        # Percentage of success. It below this at any time it fails.
+        acceptance_rate = 0.8
         failures = []
         times = []
         
-        for size in range(min_size, max_size):
-            print('On %d...' %size)
+        for size in range(min_size, max_size, skip):
+            print('on %d' %size)
             num_out = int(math.sqrt(size))
             nn = neuralnet.NeuralNetwork(size, size, num_out)
             data = []
@@ -192,16 +198,18 @@ class Test(unittest.TestCase):
                 # In other words: answer[input_index^2 + input_index] = 1
                 answer = [1 if input_bits[j*j+j] == 1 else -1 for j in range(num_out)]
                 data.append((input_bits, answer))
-                
+            
+            # Training    
             start_time = datetime.datetime.now()
             for n in range(5):
                 nn.train_network(data, 
                                  iters=1000, 
-                                 change_rate=0.5, 
-                                 momentum=0.2) 
+                                 change_rate=0.2, 
+                                 momentum=0.1) 
             t = (datetime.datetime.now() - start_time).total_seconds() 
             times.append(t)      
             
+            # Testing
             # Var to count number of failures for each size
             num_failures = 0
             for set in data:
@@ -211,23 +219,29 @@ class Test(unittest.TestCase):
                 if res != set[1]:
                     # The network got it wrong
                     num_failures += 1
+            print('%d wrong' %num_failures)
+            win_percent = float(max_size - num_failures) / float(max_size)
+            print('%f percent right' %(win_percent * 100))
+            assert win_percent >= acceptance_rate
             failures.append(num_failures)
             
-        # Plot it so I can look at something nice in a couple hours.
-        try:
-            import matplotlib.pyplot as lab
-        except:
-            ''' Install matplotlib. '''
-            pass
-        else:
-            x_data = range(min_size, max_size)
-            lab.title('Errors & Time vs Network Size -- Constant Iterations')
-            lab.xlabel('Network Size (# of input and hidden neurons)')
-            lab.ylabel('Errors (on data of size %d) and Time (seconds)' %max_size)
-            lab.plot(x_data, failures, color='r', label='Failures')
-            lab.plot(x_data, times, color='b', label='Time (seconds)')
-            lab.legend()
-            lab.show()
+        visual_desired = True
+        if visual_desired:  
+            # Plot it so I can look at something nice in a couple hours. 
+            try:
+                import matplotlib.pyplot as lab
+            except:
+                ''' Install matplotlib. '''
+                pass
+            else:
+                x_data = range(min_size, max_size, skip)
+                lab.title('Errors & Time vs Network Size -- Constant Iterations')
+                lab.xlabel('Network Size (# of input and hidden neurons)')
+                lab.ylabel('Errors (on data of size %d) and Time (seconds)' %max_size)
+                lab.plot(x_data, failures, color='r', label='Failures')
+                lab.plot(x_data, times, color='b', label='Time (seconds)')
+                lab.legend()
+                lab.show()
                 
 
 if __name__ == "__main__":
