@@ -1,5 +1,8 @@
 # Certain files we don't want included
 
+# Mac dumb files
+*.DS_STORE
+
 # Python compiled stuff
 *.pyc
 */__pycache__/
