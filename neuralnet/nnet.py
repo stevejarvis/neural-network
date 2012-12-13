@@ -142,7 +142,7 @@ class NeuralNetwork(object):
         '''In actual implementation it would be inefficient to train the 
         network each time. Instead, save and load weights.'''
         import shelve
-        d = shelve.open(source)
+        d = shelve.open(source, flag='r')
         hid_temp = d['weights_hid']
         out_temp = d['weights_out']
         if (len(self.weights_hid) != len(hid_temp) 
