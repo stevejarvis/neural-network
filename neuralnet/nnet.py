@@ -172,7 +172,7 @@ class NeuralNetwork(object):
         import shelve
         d = shelve.open(dest)
         d['weights_hid_one'] = self.weights_hid_one
-        d['weights_hid_two'] = self.weights_hid_one
+        d['weights_hid_two'] = self.weights_hid_two
         d['weights_out'] = self.weights_out
         d.close()
     

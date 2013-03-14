@@ -117,7 +117,7 @@ class Test(unittest.TestCase):
               ((1, 0), (1, 0)),
               ((1, 1), (0, 1))]
         for n in range(10):
-            nn.train_network(data, iters=1000, change_rate=0.5, momentum=0.2)
+            nn.train_network(data, iters=10000, change_rate=0.02, momentum=0.01)
         out = nn.evaluate(data[0][0])
         assert out[0] < 0.2 and out[1] > 0.8
         out = nn.evaluate(data[1][0])
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
               ((1, 0), (1, 0)),
               ((1, 1), (0, 1))]
         for n in range(10):
-            nn.train_network(data, iters=1000, change_rate=0.5, momentum=0.2)
+            nn.train_network(data, iters=10000, change_rate=0.02, momentum=0.001)
         out = nn.evaluate(data[0][0])
         assert out[0] < 0.2 and out[1] > 0.8
         out = nn.evaluate(data[1][0])
@@ -161,6 +161,7 @@ class Test(unittest.TestCase):
         nn2 = neuralnet.NeuralNetwork(2, 3, 2)
         nn2.load_weights('./save.test')
         assert nn.weights_hid_one == nn2.weights_hid_one
+        assert nn.weights_hid_two == nn2.weights_hid_two
         assert nn.weights_out == nn2.weights_out
         
     def testBadWeights(self):
@@ -172,15 +173,16 @@ class Test(unittest.TestCase):
                           './save.test')
         
     def testLargerNetworks(self):
-        return
         ''' LONG RUNNING TEST. Make a list of relatively simple but big data, 
         make sure the nnet can learn it. '''
+        return 
+    
         import math
         import datetime
         # Just change these sizes to change the network sizes tested.
-        min_size = 195
+        min_size = 180
         max_size = 200
-        skip = 3
+        skip = 9
         # Percentage of success. It below this at any time it fails.
         acceptance_rate = 0.8
         failures = []
@@ -204,9 +206,9 @@ class Test(unittest.TestCase):
             start_time = datetime.datetime.now()
             for n in range(5):
                 nn.train_network(data, 
-                                 iters=1000, 
-                                 change_rate=0.2, 
-                                 momentum=0.1) 
+                                 iters=10000, 
+                                 change_rate=0.02, 
+                                 momentum=0.01) 
             t = (datetime.datetime.now() - start_time).total_seconds() 
             times.append(t)      
             
