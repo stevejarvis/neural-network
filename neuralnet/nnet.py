@@ -37,13 +37,13 @@ class NeuralNetwork(object):
         self.num_hidden = nhid
         self.num_output = nout
         
-        self.weights_hid = self._make_matrix(self.num_input, self.num_hidden)
+        self.weights_hid_one = self._make_matrix(self.num_input, self.num_hidden)
+        self.weights_hid_two = self._make_matrix(self.num_hidden, self.num_hidden)
         self.weights_out = self._make_matrix(self.num_hidden, self.num_output)
 
-        self.momentum_hid = self._make_matrix(self.num_input, self.num_hidden, 
-                                              0.0)
-        self.momentum_out = self._make_matrix(self.num_hidden, self.num_output, 
-                                              0.0)
+        self.momentum_hid_one = self._make_matrix(self.num_input, self.num_hidden, 0.0)
+        self.momentum_hid_two = self._make_matrix(self.num_input, self.num_hidden, 0.0)
+        self.momentum_out = self._make_matrix(self.num_hidden, self.num_output, 0.0)
         
     def evaluate(self, input_vals):
         '''Will return a list of guesses per neuron based on the information 
@@ -61,11 +61,15 @@ class NeuralNetwork(object):
         # Find the hidden layers activation levels. The activation
         # levels are the sum of products of weights and neurons in (the dot
         # product). Then tanh yields the actual activation value.
-        cross = self._dot(self.activation_in, self.weights_hid)
-        self.activation_hid = [self._tanh(val) for val in cross]
+        cross = self._dot(self.activation_in, self.weights_hid_one)
+        self.activation_hid_one = [self._tanh(val) for val in cross]
+        
+        # Second hidden layer
+        cross = self._dot(self.activation_hid_one, self.weights_hid_two)
+        self.activation_hid_two = [self._tanh(val) for val in cross]
         
         # Find the output activations just like the hidden layer's.
-        cross = self._dot(self.activation_hid, self.weights_out)
+        cross = self._dot(self.activation_hid_two, self.weights_out)
         self.activation_out = [self._tanh(val) for val in cross]
             
         return self.activation_out
@@ -73,13 +77,7 @@ class NeuralNetwork(object):
     def _back_propagate(self, target, change_mult, momentum_mult):
         '''Work from the output of the network back up adjusting
         weights to inch nearer the connections (and therefore the answers) we
-        want.
-        
-        ...I struggled with back propagation for a while. I reveal my best
-        understanding in the comments but I referenced many tutorials and
-        examples before I got a grasp of it. Point is, through the struggle, 
-        this method became as much collective work of other open source 
-        projects as from my own mind.'''
+        want. '''
         # Target could have been passed as an int, but needs to be expandable
         if type(target) is int:
             target = [target]
@@ -97,13 +95,21 @@ class NeuralNetwork(object):
         # Slightly more complicated than output because of the need to consider
         # all connected neurons further down the chain. Each neurons expected
         # output is a minimization of the collective downstream errors.
-        delta_hid = [0.0] * self.num_hidden
+        delta_hid_two = [0.0] * self.num_hidden
         for j in range(self.num_hidden):
             error = 0.0
             # This inner loop sums all errors downstream of the current neuron
             for k in range(self.num_output):
                 error += delta_out[k] * self.weights_out[j][k]
-            delta_hid[j] = error * self._derivative_tanh(self.activation_hid[j])
+            delta_hid_two[j] = error * self._derivative_tanh(self.activation_hid_two[j])
+            
+        delta_hid_one = [0.0] * self.num_hidden
+        for j in range(self.num_hidden):
+            error = 0.0
+            # This inner loop sums all errors downstream of the current neuron
+            for k in range(self.num_hidden):
+                error += delta_hid_two[k] * self.weights_hid_two[j][k]
+            delta_hid_one[j] = error * self._derivative_tanh(self.activation_hid_one[j])
                 
         # Then adjust the weights of the output.
         #
@@ -111,19 +117,26 @@ class NeuralNetwork(object):
         # weights += changes
         for j in range(self.num_hidden):
             for k in range(self.num_output):
-                change = change_mult * delta_out[k] * self.activation_hid[j]
+                change = change_mult * delta_out[k] * self.activation_hid_two[j]
                 self.weights_out[j][k] += change + (momentum_mult * 
                                                     self.momentum_out[j][k])
                 # Momentum speeds up learning by minimizing "zig zagginess".
                 self.momentum_out[j][k] = change
         
-        # Update the weights for hidden layer in the same way as the output.
+        # Update the weights for hidden layers in the same way as the output.
+        for j in range(self.num_hidden):
+            for k in range(self.num_hidden):
+                change = change_mult * delta_hid_two[k] * self.activation_hid_one[j]
+                self.weights_hid_two[j][k] += change + (momentum_mult * 
+                                                    self.momentum_hid_two[j][k])
+                self.momentum_hid_two[j][k] = change
+                
         for j in range(self.num_input):
             for k in range(self.num_hidden):
-                change = change_mult * delta_hid[k] * self.activation_in[j]
-                self.weights_hid[j][k] += change + (momentum_mult * 
-                                                    self.momentum_hid[j][k])
-                self.momentum_hid[j][k] = change
+                change = change_mult * delta_hid_one[k] * self.activation_in[j]
+                self.weights_hid_one[j][k] += change + (momentum_mult * 
+                                                    self.momentum_hid_one[j][k])
+                self.momentum_hid_one[j][k] = change
                 
     def train_network(self, data_train, change_rate=0.4, momentum=0.1, 
                       iters=1000):
@@ -143,12 +156,14 @@ class NeuralNetwork(object):
         network each time. Instead, save and load weights.'''
         import shelve
         d = shelve.open(source, flag='r')
-        hid_temp = d['weights_hid']
+        hid_one_temp = d['weights_hid_one']
+        hid_two_temp = d['weights_hid_two']
         out_temp = d['weights_out']
-        if (len(self.weights_hid) != len(hid_temp) 
+        if (len(self.weights_hid_one) != len(hid_one_temp) 
                 or len(self.weights_out) != len(out_temp)):
             raise ValueError('Wrong dimensions  on set of weights.')
-        self.weights_hid = hid_temp
+        self.weights_hid_one = hid_one_temp
+        self.weights_hid_two = hid_two_temp
         self.weights_out = out_temp
         d.close()
     
@@ -156,7 +171,8 @@ class NeuralNetwork(object):
         '''Save the current weights with shelve.'''
         import shelve
         d = shelve.open(dest)
-        d['weights_hid'] = self.weights_hid
+        d['weights_hid_one'] = self.weights_hid_one
+        d['weights_hid_two'] = self.weights_hid_one
         d['weights_out'] = self.weights_out
         d.close()
     
