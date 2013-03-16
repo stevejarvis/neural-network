@@ -23,7 +23,7 @@ data_train = [((0, 0), (-1, 1)),
 
 for n in range(10000):
     # There are a handful of optional kw args, but defaults are OK.
-    nn.train_network(data_train, iters=5, momentum=0.01, change_rate=0.02)
+    nn.train_network(data_train, iters=5, momentum=0.001, change_rate=0.02)
     
     for i in range(4):
         out = nn.evaluate(data_train[i][0])

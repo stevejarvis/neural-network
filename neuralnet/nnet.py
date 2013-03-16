@@ -88,6 +88,17 @@ class NeuralNetwork(object):
         for j in range(self.num_output):
             error = target[j] - self.activation_out[j]
             delta_out[j] = error * self._derivative_tanh(self.activation_out[j])
+            
+        # Then adjust the weights of the output.
+        # change = cofactor * delta * current_value + momentum
+        # weights += changes
+        for j in range(self.num_hidden):
+            for k in range(self.num_output):
+                change = change_mult * delta_out[k] * self.activation_hid_two[j]
+                self.weights_out[j][k] += change + (momentum_mult * 
+                                                    self.momentum_out[j][k])
+                # Momentum speeds up learning by minimizing "zig zagginess".
+                self.momentum_out[j][k] = change
         
         # Calculate the deltas of the hidden layer.
         # delta = sum(downstream weights * deltas) * d(tanh(a))/da
@@ -102,7 +113,16 @@ class NeuralNetwork(object):
             for k in range(self.num_output):
                 error += delta_out[k] * self.weights_out[j][k]
             delta_hid_two[j] = error * self._derivative_tanh(self.activation_hid_two[j])
-            
+                
+        # Update the weights for hidden layer.
+        for j in range(self.num_hidden):
+            for k in range(self.num_hidden):
+                change = change_mult * delta_hid_two[k] * self.activation_hid_one[j]
+                self.weights_hid_two[j][k] += change + (momentum_mult * 
+                                                    self.momentum_hid_two[j][k])
+                self.momentum_hid_two[j][k] = change
+         
+        # After the hid2 weights change, find deltas for hid1.       
         delta_hid_one = [0.0] * self.num_hidden
         for j in range(self.num_hidden):
             error = 0.0
@@ -110,27 +130,8 @@ class NeuralNetwork(object):
             for k in range(self.num_hidden):
                 error += delta_hid_two[k] * self.weights_hid_two[j][k]
             delta_hid_one[j] = error * self._derivative_tanh(self.activation_hid_one[j])
-                
-        # Then adjust the weights of the output.
-        #
-        # change = cofactor * delta * current_value + momentum
-        # weights += changes
-        for j in range(self.num_hidden):
-            for k in range(self.num_output):
-                change = change_mult * delta_out[k] * self.activation_hid_two[j]
-                self.weights_out[j][k] += change + (momentum_mult * 
-                                                    self.momentum_out[j][k])
-                # Momentum speeds up learning by minimizing "zig zagginess".
-                self.momentum_out[j][k] = change
-        
-        # Update the weights for hidden layers in the same way as the output.
-        for j in range(self.num_hidden):
-            for k in range(self.num_hidden):
-                change = change_mult * delta_hid_two[k] * self.activation_hid_one[j]
-                self.weights_hid_two[j][k] += change + (momentum_mult * 
-                                                    self.momentum_hid_two[j][k])
-                self.momentum_hid_two[j][k] = change
-                
+         
+        # And update the hid1 weights       
         for j in range(self.num_input):
             for k in range(self.num_hidden):
                 change = change_mult * delta_hid_one[k] * self.activation_in[j]
