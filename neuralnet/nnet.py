@@ -68,7 +68,7 @@ class NeuralNetwork(object):
         cross = self._dot(self.activation_hid_one, self.weights_hid_two)
         self.activation_hid_two = [self._tanh(val) for val in cross]
         
-        # Find the output activations just like the hidden layer's.
+        # Output activations just like the hidden layers'.
         cross = self._dot(self.activation_hid_two, self.weights_out)
         self.activation_out = [self._tanh(val) for val in cross]
             
@@ -88,56 +88,81 @@ class NeuralNetwork(object):
         for j in range(self.num_output):
             error = target[j] - self.activation_out[j]
             delta_out[j] = error * self._derivative_tanh(self.activation_out[j])
-            
-        # Then adjust the weights of the output.
-        # change = cofactor * delta * current_value + momentum
-        # weights += changes
-        for j in range(self.num_hidden):
-            for k in range(self.num_output):
-                change = change_mult * delta_out[k] * self.activation_hid_two[j]
-                self.weights_out[j][k] += change + (momentum_mult * 
-                                                    self.momentum_out[j][k])
-                # Momentum speeds up learning by minimizing "zig zagginess".
-                self.momentum_out[j][k] = change
         
-        # Calculate the deltas of the hidden layer.
-        # delta = sum(downstream weights * deltas) * d(tanh(a))/da
-        #
-        # Slightly more complicated than output because of the need to consider
-        # all connected neurons further down the chain. Each neurons expected
-        # output is a minimization of the collective downstream errors.
-        delta_hid_two = [0.0] * self.num_hidden
-        for j in range(self.num_hidden):
-            error = 0.0
-            # This inner loop sums all errors downstream of the current neuron
-            for k in range(self.num_output):
-                error += delta_out[k] * self.weights_out[j][k]
-            delta_hid_two[j] = error * self._derivative_tanh(self.activation_hid_two[j])
+        # Update the output weights
+        self._update_weights(self.weights_out, 
+                             self.num_hidden, 
+                             self.activation_hid_two, 
+                             self.num_output, 
+                             delta_out, 
+                             self.momentum_out, 
+                             change_mult, 
+                             momentum_mult)
+        
+        # Find deltas for the second hidden layer.
+        delta_hid_two = self._calc_deltas(self.num_hidden, 
+                                          self.activation_hid_two, 
+                                          self.num_output, 
+                                          delta_out, 
+                                          self.weights_out)
+        
                 
         # Update the weights for hidden layer.
-        for j in range(self.num_hidden):
-            for k in range(self.num_hidden):
-                change = change_mult * delta_hid_two[k] * self.activation_hid_one[j]
-                self.weights_hid_two[j][k] += change + (momentum_mult * 
-                                                    self.momentum_hid_two[j][k])
-                self.momentum_hid_two[j][k] = change
+        self._update_weights(self.weights_hid_two, 
+                             self.num_hidden, 
+                             self.activation_hid_one, 
+                             self.num_hidden, 
+                             delta_hid_two, 
+                             self.momentum_hid_two, 
+                             change_mult, 
+                             momentum_mult)
          
-        # After the hid2 weights change, find deltas for hid1.       
-        delta_hid_one = [0.0] * self.num_hidden
-        for j in range(self.num_hidden):
+        # After the hid two weights change, find deltas for hid1.       
+        delta_hid_one = self._calc_deltas(self.num_hidden, 
+                                          self.activation_hid_one, 
+                                          self.num_hidden, 
+                                          delta_hid_two, 
+                                          self.weights_hid_two)
+         
+        # And update the hid one weights 
+        self._update_weights(self.weights_hid_one, 
+                             self.num_input, 
+                             self.activation_in, 
+                             self.num_hidden, 
+                             delta_hid_one, 
+                             self.momentum_hid_one, 
+                             change_mult, 
+                             momentum_mult)
+              
+    def _calc_deltas(self, number_nodes, activations, number_nodes_downstream, 
+                     deltas_downstream, weights_downstream):
+        # Calculate the deltas of the hidden layer.
+        # delta = sum(downstream weights * deltas) * d(tanh(a))/da
+        deltas = [0.0] * number_nodes
+        for j in range(number_nodes):
             error = 0.0
             # This inner loop sums all errors downstream of the current neuron
-            for k in range(self.num_hidden):
-                error += delta_hid_two[k] * self.weights_hid_two[j][k]
-            delta_hid_one[j] = error * self._derivative_tanh(self.activation_hid_one[j])
-         
-        # And update the hid1 weights       
-        for j in range(self.num_input):
-            for k in range(self.num_hidden):
-                change = change_mult * delta_hid_one[k] * self.activation_in[j]
-                self.weights_hid_one[j][k] += change + (momentum_mult * 
-                                                    self.momentum_hid_one[j][k])
-                self.momentum_hid_one[j][k] = change
+            for k in range(number_nodes_downstream):
+                error += deltas_downstream[k] * weights_downstream[j][k]
+            deltas[j] = error * self._derivative_tanh(activations[j])
+        return deltas
+    
+    def _update_weights(self, changing_weights, number_nodes_upstream, 
+                        activations_upstream, number_nodes_downstream, 
+                        deltas_downstream, momentums, change_co, 
+                        mom_co):
+        # change = cofactor * delta * current_value + momentum
+        # weights += changes
+        for j in range(number_nodes_upstream):
+            for k in range(number_nodes_downstream):
+                change = change_co * deltas_downstream[k] * activations_upstream[j]
+                # This works because parameters are passed by value but are
+                # references to the variable. Lists are mutable, so changes will
+                # be reflected IRL.
+                changing_weights[j][k] += change + (mom_co * 
+                                                    momentums[j][k])
+                # Momentum speeds up learning by minimizing "zig zagginess".
+                momentums[j][k] = change
                 
     def train_network(self, data_train, change_rate=0.4, momentum=0.1, 
                       iters=1000):
