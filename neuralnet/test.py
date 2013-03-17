@@ -117,7 +117,7 @@ class Test(unittest.TestCase):
               ((1, 0), (1, 0)),
               ((1, 1), (0, 1))]
         for n in range(10):
-            nn.train_network(data, iters=10000, change_rate=0.02, momentum=0.01)
+            nn.train_network(data, iters=15000, change_rate=0.02, momentum=0.01)
         out = nn.evaluate(data[0][0])
         assert out[0] < 0.2 and out[1] > 0.8
         out = nn.evaluate(data[1][0])
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
               ((1, 0), (1, 0)),
               ((1, 1), (0, 1))]
         for n in range(10):
-            nn.train_network(data, iters=10000, change_rate=0.02, momentum=0.001)
+            nn.train_network(data, iters=15000, change_rate=0.02, momentum=0.001)
         out = nn.evaluate(data[0][0])
         assert out[0] < 0.2 and out[1] > 0.8
         out = nn.evaluate(data[1][0])
