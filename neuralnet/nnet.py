@@ -42,7 +42,7 @@ class NeuralNetwork(object):
         self.weights_out = self._make_matrix(self.num_hidden, self.num_output)
 
         self.momentum_hid_one = self._make_matrix(self.num_input, self.num_hidden, 0.0)
-        self.momentum_hid_two = self._make_matrix(self.num_input, self.num_hidden, 0.0)
+        self.momentum_hid_two = self._make_matrix(self.num_hidden, self.num_hidden, 0.0)
         self.momentum_out = self._make_matrix(self.num_hidden, self.num_output, 0.0)
         
     def evaluate(self, input_vals):
