@@ -5,7 +5,7 @@ Created on Sep 19, 2012
 
 Now do your tests first, honey.
 
-Write temp files to end in '.test' and they'll be 
+Write temp files to end in '.test' and they'll be
 cleaned up.
 '''
 
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
     def tearDown(self):
         # Tests that write to files should write to .test files, they'll be
         # cleaned up.
-        for f in glob.glob('*.test'):
+        for f in glob.glob('*.test.*'):
             os.remove(f)
 
     def testEvaluation(self):
@@ -40,12 +40,12 @@ class Test(unittest.TestCase):
             ans = nn.evaluate(val)
             for val in ans:
                 assert -1 < val < 1
-    
+
     def testBadInputInit(self):
-        self.assertRaises(ValueError, 
+        self.assertRaises(ValueError,
                           neuralnet.NeuralNetwork,
                           1, 0, 1)
-        
+
     def testMatrixMaker(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)
         matrix = nn._make_matrix(2, 3)
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         assert nn._tanh(0)  == 0
         assert 0.46211 < nn._tanh(0.5) < 0.46212
         assert round(nn._tanh(0.1), 6) == round((-1 * nn._tanh(-0.1)), 6)
-        
+
     def testEvaluationError(self):
         nn = neuralnet.NeuralNetwork(4,5,2)
         values = [1,2,3,4,5]
@@ -90,14 +90,14 @@ class Test(unittest.TestCase):
                 ((1, 0), 1),
                 ((1, 1), 0)]
         nn.train_network(data)
-        
+
     def testOverflow(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)
         for i in range(10):
             val = decimal.Decimal(random.random())
             tan = nn._tanh(float(val))
             assert -1 < tan < 1
-            
+
     def testDot(self):
         nn = neuralnet.NeuralNetwork(2, 2, 1)
         m1 = [1, 2, 3]
@@ -109,10 +109,10 @@ class Test(unittest.TestCase):
         self.assertRaises(ValueError,
                           nn._dot,
                           m1, m2)
-        
+
     def testOverall(self):
         nn = neuralnet.NeuralNetwork(2, 3, 2)
-        data = [((0, 0), (0, 1)), 
+        data = [((0, 0), (0, 1)),
               ((0, 1), (1, 0)),
               ((1, 0), (1, 0)),
               ((1, 1), (0, 1))]
@@ -126,10 +126,10 @@ class Test(unittest.TestCase):
         assert out[0] > 0.8 and out[1] < 0.2
         out = nn.evaluate(data[3][0])
         assert out[0] < 0.2 and out[1] > 0.8
-        
+
     def testSaveLoadWeightsFunctionality(self):
         nn = neuralnet.NeuralNetwork(2, 3, 2)
-        data = [((0, 0), (0, 1)), 
+        data = [((0, 0), (0, 1)),
               ((0, 1), (1, 0)),
               ((1, 0), (1, 0)),
               ((1, 1), (0, 1))]
@@ -154,7 +154,7 @@ class Test(unittest.TestCase):
         assert out[0] > 0.8 and out[1] < 0.2
         out = nn2.evaluate(data[3][0])
         assert out[0] < 0.2 and out[1] > 0.8
-       
+
     def testSaveLoad(self):
         nn = neuralnet.NeuralNetwork(2, 3, 2)
         nn.save_weights('./save.test')
@@ -163,20 +163,20 @@ class Test(unittest.TestCase):
         assert nn.weights_hid_one == nn2.weights_hid_one
         assert nn.weights_hid_two == nn2.weights_hid_two
         assert nn.weights_out == nn2.weights_out
-        
+
     def testBadWeights(self):
         nn = neuralnet.NeuralNetwork(2, 4, 2)
         nn.save_weights('./save.test')
         nn2 = neuralnet.NeuralNetwork(1, 7, 1)
-        self.assertRaises(ValueError, 
+        self.assertRaises(ValueError,
                           nn2.load_weights,
                           './save.test')
-        
+
     def testLargerNetworks(self):
-        ''' LONG RUNNING TEST. Make a list of relatively simple but big data, 
+        ''' LONG RUNNING TEST. Make a list of relatively simple but big data,
         make sure the nnet can learn it. '''
-        return 
-    
+        return
+
         import math
         import datetime
         # Just change these sizes to change the network sizes tested.
@@ -187,31 +187,31 @@ class Test(unittest.TestCase):
         acceptance_rate = 0.8
         failures = []
         times = []
-        
+
         for size in range(min_size, max_size, skip):
             print('on %d' %size)
             num_out = int(math.sqrt(size))
             nn = neuralnet.NeuralNetwork(size, size, num_out)
             data = []
             for i in range(max_size):
-                # Consider the input the index of number 1. i.e. [0,0,0,1] is 
+                # Consider the input the index of number 1. i.e. [0,0,0,1] is
                 # thought of as 3.
                 input_bits = [1  if j == i else 0 for j in range(size)]
                 # Learn math: answer = root(input_index) - input_index
                 # In other words: answer[input_index^2 + input_index] = 1
                 answer = [1 if input_bits[j*j+j] == 1 else -1 for j in range(num_out)]
                 data.append((input_bits, answer))
-            
-            # Training    
+
+            # Training
             start_time = datetime.datetime.now()
             for n in range(5):
-                nn.train_network(data, 
-                                 iters=10000, 
-                                 change_rate=0.02, 
-                                 momentum=0.01) 
-            t = (datetime.datetime.now() - start_time).total_seconds() 
-            times.append(t)      
-            
+                nn.train_network(data,
+                                 iters=10000,
+                                 change_rate=0.02,
+                                 momentum=0.01)
+            t = (datetime.datetime.now() - start_time).total_seconds()
+            times.append(t)
+
             # Testing
             # Var to count number of failures for each size
             num_failures = 0
@@ -227,10 +227,10 @@ class Test(unittest.TestCase):
             print('%f percent right' %(win_percent * 100))
             assert win_percent >= acceptance_rate
             failures.append(num_failures)
-            
-        visual_desired = True
-        if visual_desired:  
-            # Plot it so I can look at something nice in a couple hours. 
+
+        visual_desired = False
+        if visual_desired:
+            # Plot it so I can look at something nice in a couple hours.
             try:
                 import matplotlib.pyplot as lab
             except:
@@ -245,7 +245,7 @@ class Test(unittest.TestCase):
                 lab.plot(x_data, times, color='b', label='Time (seconds)')
                 lab.legend()
                 lab.show()
-                
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
