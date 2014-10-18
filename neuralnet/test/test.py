@@ -16,6 +16,8 @@ import os
 import glob
 import random
 import decimal
+# So can run from base directory of project or the neuralnet package
+sys.path.append('.')
 sys.path.append('..')
 import neuralnet
 
@@ -27,7 +29,7 @@ class Test(unittest.TestCase):
     def tearDown(self):
         # Tests that write to files should write to .test files, they'll be
         # cleaned up.
-        for f in glob.glob('*.test.*'):
+        for f in glob.glob('*.test'):
             os.remove(f)
 
     def testEvaluation(self):
