@@ -1,11 +1,12 @@
-I've created this project to learn more about AI and how neural networks 
-operate.
+Neural Network, Eh
+==================
 
-The network here is one consisting of 4 layers (1 input, 2 hidden, 1 out) and 
-is made flexible with variable numbers of neurons and coefficients affecting 
-momentum and learning rate. They simple flexibility makes it easy to see how 
-changes affect behavoir (i.e. epochs until a set is learned, or whether a set 
-can be learned at all.)
+This project was started to learn more about AI and how neural networks operate.
 
-I'd like this code to be used freely, it's licensed with the MIT license.
-See LICENSE for more details.
+The network here is one consisting of 4 layers (1 input, 2 hidden, 1 out) and
+is made flexible with variable numbers of neurons and coefficients affecting
+momentum and learning rate. The flexibility makes it easy to see how simple
+changes can affect behavior (i.e. epochs until a set is learned, or whether a
+set can be learned at all.)
+
+Licensed with the MIT license. See LICENSE for more details.
